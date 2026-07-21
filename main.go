@@ -3,6 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
+	"strconv"
+
+	// "log"
 	"net/http"
 
 	"github.com/MaminirinaEdwino/turbojwt"
@@ -23,36 +27,55 @@ type bodyType struct {
 }
 
 func handleGeneratingToken(w http.ResponseWriter, r *http.Request) {
-	var bodyValue bodyType
-	json.NewDecoder(r.Body).Decode(&bodyValue)
+	temp, _ := template.ParseFiles("token.html")
+
+	nbrD, _ := strconv.Atoi(r.PostFormValue("number_of_day"))
 	token, err := turbojwt.Encode("secret", map[string]any{
-		"full_name":     bodyValue.FullName,
-		"email":         bodyValue.Email,
-		"number_of_day": bodyValue.NumberOfDay,
-		"payment_ref":   bodyValue.PaymentRef,
-		"subscription":  bodyValue.Subscription,
-	}, float64(bodyValue.NumberOfDay*24), 0)
-	if err != nil {
-		json.NewEncoder(w).Encode(err)
+		"full_name":     r.PostFormValue("full_name"),
+		"email":         r.PostFormValue("email"),
+		"number_of_day": r.PostFormValue("number_of_day"),
+		"payment_ref":   r.PostFormValue("payment_ref"),
+		"subscription":  r.PostFormValue("subscription"),
+	}, float64(nbrD*24), 0)
+	data := struct {
+		Full_name     string
+		Email         string
+		Number_of_day int
+		Subscription  string
+		Payment_ref   string
+		Token         string
+	}{
+		Full_name:     r.PostFormValue("full_name"),
+		Email:         r.PostFormValue("email"),
+		Number_of_day: nbrD,
+		Payment_ref:   r.PostFormValue("payment_ref"),
+		Token:         token,
+		Subscription:  r.PostFormValue("subscription"),
 	}
-	json.NewEncoder(w).Encode(token)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	temp.Execute(w, data)
 }
 
 func handleGeneratingTokenInterface(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "index.html")
 }
+
 func handleVerifyToken(w http.ResponseWriter, r *http.Request) {
-	var token map[string]string
-	json.NewDecoder(r.Body).Decode(&token)
-	value, err := turbojwt.Verify("secret", token["token"], 0)
+	token := r.PostFormValue("token")
+	value, err := turbojwt.Verify("secret", token, 0)
 	if err != nil {
 		json.NewEncoder(w).Encode(err)
 	}
 	json.NewEncoder(w).Encode(value)
 }
+
 func handleVerifyTolenInterface(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "verify.html")
 }
+
 func startServer(mux *http.ServeMux, PORT int) {
 	fmt.Printf("Server started on port : http://localhost:%d\n", PORT)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", PORT), mux)
@@ -64,8 +87,10 @@ func startServer(mux *http.ServeMux, PORT int) {
 func main() {
 	mux := http.NewServeMux()
 	PORT := 1627
-	mux.HandleFunc("GET /", handleHome)
+	mux.HandleFunc("GET /", handleGeneratingTokenInterface)
 	mux.HandleFunc("GET /token", handleGeneratingTokenInterface)
+	mux.HandleFunc("GET /verify", handleVerifyTolenInterface)
+	mux.HandleFunc("POST /verify", handleVerifyToken)
 	mux.HandleFunc("POST /token", handleGeneratingToken)
 	startServer(mux, PORT)
 }
