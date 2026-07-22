@@ -34,7 +34,6 @@ func handleGeneratingToken(w http.ResponseWriter, r *http.Request) {
 		"full_name":     r.PostFormValue("full_name"),
 		"email":         r.PostFormValue("email"),
 		"number_of_day": r.PostFormValue("number_of_day"),
-		"payment_ref":   r.PostFormValue("payment_ref"),
 		"subscription":  r.PostFormValue("subscription"),
 	}, float64(nbrD*24), 0)
 	data := struct {
@@ -48,7 +47,6 @@ func handleGeneratingToken(w http.ResponseWriter, r *http.Request) {
 		Full_name:     r.PostFormValue("full_name"),
 		Email:         r.PostFormValue("email"),
 		Number_of_day: nbrD,
-		Payment_ref:   r.PostFormValue("payment_ref"),
 		Token:         token,
 		Subscription:  r.PostFormValue("subscription"),
 	}
