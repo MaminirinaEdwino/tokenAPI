@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"strconv"
+	"time"
 
 	// "log"
 	"net/http"
@@ -36,6 +37,9 @@ func handleGeneratingToken(w http.ResponseWriter, r *http.Request) {
 		"number_of_day": r.PostFormValue("number_of_day"),
 		"subscription":  r.PostFormValue("subscription"),
 	}, float64(nbrD*24), 0)
+	decoded, _ := turbojwt.Verify("secret", token, 0)
+	exp := decoded["exp"].(float64)
+	expDate := time.Unix(int64(exp), 0).Format(time.UnixDate)
 	data := struct {
 		Full_name     string
 		Email         string
@@ -43,12 +47,14 @@ func handleGeneratingToken(w http.ResponseWriter, r *http.Request) {
 		Subscription  string
 		Payment_ref   string
 		Token         string
+		ExpDate       string
 	}{
 		Full_name:     r.PostFormValue("full_name"),
 		Email:         r.PostFormValue("email"),
 		Number_of_day: nbrD,
 		Token:         token,
 		Subscription:  r.PostFormValue("subscription"),
+		ExpDate: expDate,
 	}
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -82,6 +88,7 @@ func startServer(mux *http.ServeMux, PORT int) {
 		startServer(mux, PORT+1)
 	}
 }
+
 func main() {
 	mux := http.NewServeMux()
 	PORT := 1627
