@@ -28,7 +28,7 @@ type bodyType struct {
 }
 
 func handleGeneratingToken(w http.ResponseWriter, r *http.Request) {
-	temp, _ := template.ParseFiles("token.html")
+	temp, _ := template.ParseFiles("views/token.html")
 
 	nbrD, _ := strconv.Atoi(r.PostFormValue("number_of_day"))
 	token, err := turbojwt.Encode("secret", map[string]any{
@@ -64,7 +64,7 @@ func handleGeneratingToken(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleGeneratingTokenInterface(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "index.html")
+	http.ServeFile(w, r, "views/index.html")
 }
 
 func handleVerifyToken(w http.ResponseWriter, r *http.Request) {
@@ -77,7 +77,7 @@ func handleVerifyToken(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleVerifyTolenInterface(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "verify.html")
+	http.ServeFile(w, r, "views/verify.html")
 }
 
 func startServer(mux *http.ServeMux, PORT int) {
@@ -91,8 +91,12 @@ func startServer(mux *http.ServeMux, PORT int) {
 
 func main() {
 	mux := http.NewServeMux()
+
+	styleServer := http.FileServer(http.Dir("styles"))
+
 	PORT := 1627
-	mux.HandleFunc("GET /", handleGeneratingTokenInterface)
+	mux.Handle("GET /styles/", http.StripPrefix("/styles/", styleServer))
+	// mux.HandleFunc("GET /", handleGeneratingTokenInterface)
 	mux.HandleFunc("GET /token", handleGeneratingTokenInterface)
 	mux.HandleFunc("GET /verify", handleVerifyTolenInterface)
 	mux.HandleFunc("POST /verify", handleVerifyToken)
