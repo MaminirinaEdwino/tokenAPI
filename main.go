@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"log"
 	"strconv"
 	"time"
 
@@ -13,19 +14,7 @@ import (
 	"github.com/MaminirinaEdwino/turbojwt"
 )
 
-func handleHome(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(map[string]string{
-		"message": "home",
-	})
-}
 
-type bodyType struct {
-	FullName     string `json:"full_name"`
-	Email        string `json:"email"`
-	NumberOfDay  int    `json:"number_of_day"`
-	PaymentRef   string `json:"payment_ref"`
-	Subscription string `json:"subscription"`
-}
 
 func handleGeneratingToken(w http.ResponseWriter, r *http.Request) {
 	temp, _ := template.ParseFiles("views/token.html")
@@ -54,7 +43,7 @@ func handleGeneratingToken(w http.ResponseWriter, r *http.Request) {
 		Number_of_day: nbrD,
 		Token:         token,
 		Subscription:  r.PostFormValue("subscription"),
-		ExpDate: expDate,
+		ExpDate:       expDate,
 	}
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -74,6 +63,48 @@ func handleVerifyToken(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(err)
 	}
 	json.NewEncoder(w).Encode(value)
+}
+
+func UnixToFormattedDate(unixTimestamp int64) string {
+	// 1. Convertir le timestamp Unix en type time.Time
+	t := time.Unix(unixTimestamp, 0)
+
+	// 2. Formater la date avec le pattern de référence de Go (2006-01-02 15:04:05)
+	return t.Format("02/01/2006 à 15:04:05")
+}
+
+func handleVerifyTokenForm(w http.ResponseWriter, r *http.Request) {
+	token := r.PostFormValue("token")
+	value, err := turbojwt.Verify("secret", token, 0)
+	if err != nil {
+		json.NewEncoder(w).Encode(err)
+	}
+	tmpl, err := template.ParseFiles("views/verify_result.html")
+	if err != nil {
+		log.Fatalf("Erreur lors du parsing du template : %v", err)
+	}
+	float64ext, ok := value["exp"].(float64)
+
+	if ok {
+		fmt.Println(value["exp"])
+	}
+	int64iat, _ := value["iat"].(float64)
+	// Exemple 1: Avec une Map (directement issue du JSON)
+	dataMap := map[string]interface{}{
+		"email":         value["email"],
+		"exp":           UnixToFormattedDate(int64(float64ext)),
+		"full_name":     value["full_name"],
+		"iat":           UnixToFormattedDate(int64(int64iat)),
+		"number_of_day": value["number_of_day"],
+		"subscription":  value["subscription"],
+	}
+
+	// Exécution du template (écrit dans la sortie standard os.Stdout pour tester)
+	log.Println("--- Rendu du template avec Map ---")
+	err = tmpl.Execute(w, dataMap)
+	if err != nil {
+		log.Fatalf("Erreur lors de l'exécution du template : %v", err)
+	}
 }
 
 func handleVerifyTolenInterface(w http.ResponseWriter, r *http.Request) {
@@ -100,6 +131,7 @@ func main() {
 	mux.HandleFunc("GET /", handleGeneratingTokenInterface)
 	mux.HandleFunc("GET /verify", handleVerifyTolenInterface)
 	mux.HandleFunc("POST /verify", handleVerifyToken)
+	mux.HandleFunc("POST /verify-form", handleVerifyTokenForm)
 	mux.HandleFunc("POST /token", handleGeneratingToken)
 	startServer(mux, PORT)
 }
