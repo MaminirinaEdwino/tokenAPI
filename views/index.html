@@ -1,35 +1,186 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/styles/styles.css" type="text/css">
-    <title>Generate token</title>
+    <title>Generate Token - TurboStack</title>
+    <style>
+        /* --- Reset & Variables --- */
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #6366f1;
+            --accent-hover: #4f46e5;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --focus-ring: rgba(99, 102, 241, 0.35);
+            --radius: 12px;
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+        }
+
+        /* --- Conteneur de carte --- */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+        }
+
+        /* --- En-tête --- */
+        .card-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .card-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-header p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        /* --- Formulaire --- */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        /* Inputs --- */
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 4px var(--focus-ring);
+            background-color: rgba(15, 23, 42, 0.9);
+        }
+
+        input::placeholder {
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+
+        /* --- Bouton d'envoi --- */
+        input[type="submit"] {
+            margin-top: 0.5rem;
+            padding: 0.85rem;
+            background-color: var(--accent-color);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        input[type="submit"]:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        input[type="submit"]:active {
+            transform: translateY(0);
+        }
+    </style>
 </head>
 
 <body>
-    <h1>TurboStack Tokenizer</h1>
-    <form action="/token" method="post">
-        <div>
-            <label for="">Full Name</label>
-            <input type="text" name="full_name" id="full_name">
-        </div>
-        <div>
-            <label for="">Email</label>
-            <input type="text" name="email" id="email">
-        </div>
-        <div>
-            <label for="">Number of Day</label>
-            <input type="number" name="number_of_day" id="number_of_day">
-        </div>
-        <div>
-            <label for="">Subscription</label>
-            <input type="text" name="subscription" id="subscription">
-        </div>
-        <input type="submit" value="Send">
-    </form>
-</body>
 
+    <main class="card">
+        <header class="card-header">
+            <h1>TurboStack Tokenizer</h1>
+            <p>Générez votre jeton d'accès en remplissant les détails ci-dessous.</p>
+        </header>
+
+        <form action="/token" method="post">
+            <div class="form-group">
+                <label for="full_name">Nom complet</label>
+                <input type="text" name="full_name" id="full_name" placeholder="John Doe" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Adresse Email</label>
+                <input type="email" name="email" id="email" placeholder="john@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="number_of_day">Nombre de jours</label>
+                <input type="number" name="number_of_day" id="number_of_day" placeholder="30" min="1" required>
+            </div>
+
+            <div class="form-group">
+                <label for="subscription">Abonnement</label>
+                <select name="subscription" id="subscription" required>
+                    <option value="" disabled selected>Sélectionner un plan...</option>
+                    <option value="free">Free</option>
+                    <option value="pro">Pro</option>
+                    <option value="enterprise">Enterprise</option>
+                </select>
+            </div>
+
+            <input type="submit" value="Générer le jeton">
+        </form>
+    </main>
+
+</body>
 
 </html>

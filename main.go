@@ -97,7 +97,7 @@ func main() {
 	PORT := 1627
 	mux.Handle("GET /styles/", http.StripPrefix("/styles/", styleServer))
 	// mux.HandleFunc("GET /", handleGeneratingTokenInterface)
-	mux.HandleFunc("GET /token", handleGeneratingTokenInterface)
+	mux.HandleFunc("GET /", handleGeneratingTokenInterface)
 	mux.HandleFunc("GET /verify", handleVerifyTolenInterface)
 	mux.HandleFunc("POST /verify", handleVerifyToken)
 	mux.HandleFunc("POST /token", handleGeneratingToken)
